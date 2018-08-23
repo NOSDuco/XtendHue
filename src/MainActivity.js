@@ -1,57 +1,47 @@
 import React, { Component } from 'react';
 import FindHueBridges from './FindHueBridges';
-import Hue, { HueApi } from 'node-hue-api';
+import { HueApi } from 'node-hue-api';
 const NodeCache = require('node-cache');
 
 class MainActivity extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             isLoading: true,
             hueConnected: false
         };
         this.cache = new NodeCache( { stdTLL: 0, checkperoid: 0, deleteOnExpire: false });
-        this.initHue = this.initHue.bind(this);
         this.loadCache = this.loadCache.bind(this);
         this.connectHue = this.connectHue.bind(this);
-        this.findHueBridges = this.findHueBridges(this);
     }
 
     componentDidMount() {
+        this.setState({
+            isLoading: true,
+        });
         //Get IP from cache
         this.cache.mget(["hue-hub-ip-address", "hue-hub-username"], this.loadCache);
     }
 
     loadCache(err, values){
-        if(values['hue-hub-ip-address'] != undefined && values['hue-hub-username'] != undefined){
+        if(values['hue-hub-ip-address'] && values['hue-hub-username']){
             //if IP and username found
             this.setState({
                 ip: values['hue-hub-ip-address'],
                 username: values['hue-hub-username']
             });
             this.connectHue();
-        }else{
-            //if IP not found
-            this.initHue();
         }
-    }
-
-    initHue(){
-        this.findHueBridges();
-    }
-
-    findHueBridges(){
-        Hue.nupnpSearch().then(function() {
-
-
-        }).done();
-
+        this.setState({
+            isLoading: false,
+            selectBridge: true,
+        });
     }
 
     connectHue(){
         this.hueAPI = new HueApi(this.state.ip, this.state.username);
-        this.hueAPI.getVersion().then(function() {
+        this.hueAPI.getVersion().then(function(result) {
             this.setState({
                 isLoading: false,
                 message: JSON.stringify(result, null, 2),
@@ -69,7 +59,7 @@ class MainActivity extends Component {
         }else if(this.state.selectBridge){
             return (
                 <div>
-                    <FindHueBridges hue=Hue />
+                    <FindHueBridges />
                 </div>
             );
         }else{
@@ -77,7 +67,7 @@ class MainActivity extends Component {
                 <div>
                     <center>
                         <h2>Connected:</h2>
-                        <p>{{ this.state.message }}</p>
+                        <p>{ this.state.message }</p>
                     </center>
                 </div>
             );
