@@ -11,6 +11,7 @@ class FindHueBridges extends Component {
         };
         this.searchCallback = this.searchCallback.bind(this);
         this.connect = this.connect.bind(this);
+        this.writeCacheAndEnd = this.writeCacheAndEnd.bind(this);
     }
 
     componentDidMount() {
@@ -44,10 +45,22 @@ class FindHueBridges extends Component {
                     this.setState({
                         isSearching: true,
                         user: user,
+                        host: host,
                     });
+                    this.writeCacheAndEnd();
                 }
             }
         );
+    }
+
+    writeCacheAndEnd(){
+        let hueinfo = { host: this.state.host, username: this.state.user };
+        this.props.cache.set("hue-hub-ip-address", hueinfo, function(err, success) {
+            if (err) throw err;
+            if(success){
+            }
+        });
+        this.props.foundBridge();
     }
 
     render() {

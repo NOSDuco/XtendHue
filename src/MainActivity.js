@@ -14,6 +14,7 @@ class MainActivity extends Component {
         this.cache = new NodeCache( { stdTLL: 0, checkperoid: 0, deleteOnExpire: false });
         this.loadCache = this.loadCache.bind(this);
         this.connectHue = this.connectHue.bind(this);
+        this.foundHueBridge = this.foundHueBridge.bind(this);
     }
 
     componentDidMount() {
@@ -21,15 +22,15 @@ class MainActivity extends Component {
             isLoading: true,
         });
         //Get IP from cache
-        this.cache.mget(["hue-hub-ip-address", "hue-hub-username"], this.loadCache);
+        this.cache.get("hue-hub-info", this.loadCache);
     }
 
-    loadCache(err, values){
-        if(values['hue-hub-ip-address'] && values['hue-hub-username']){
+    loadCache(err, value){
+        if(value != undefined){
             //if IP and username found
             this.setState({
-                ip: values['hue-hub-ip-address'],
-                username: values['hue-hub-username']
+                ip: value.host,
+                username: value.username,
             });
             this.connectHue();
         }
@@ -49,6 +50,13 @@ class MainActivity extends Component {
         }).done();
     }
 
+    foundHueBridge(){
+        this.componentDidMount();
+        this.setState({
+            selectBridge: false,
+        });
+    }
+
     render() {
         if(this.state.isLoading){
             return(
@@ -59,7 +67,7 @@ class MainActivity extends Component {
         }else if(this.state.selectBridge){
             return (
                 <div>
-                    <FindHueBridges />
+                    <FindHueBridges foundHueBridge={ this.foundHue } cache={ this.cache } />
                 </div>
             );
         }else{
