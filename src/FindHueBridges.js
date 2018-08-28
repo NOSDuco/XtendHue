@@ -63,9 +63,9 @@ class FindHueBridges extends Component {
         console.log('Writing cache and ending');
         console.log('Host: ' + this.state.host);
         console.log('User: ' + this.state.user);
-        this.props.store.set('hub-host', this.state.host);
-        this.props.store.set('hub-username', this.state.user);
-        //this.props.foundHueBridge();
+        this.props.config.set('hub-host', this.state.host);
+        this.props.config.set('hub-username', this.state.user);
+        this.props.foundHueBridge();
     }
 
     render() {

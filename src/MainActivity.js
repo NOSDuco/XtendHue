@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import FindHueBridges from './FindHueBridges';
 import { HueApi } from 'node-hue-api';
-import Store from 'data-store';
+import fs from 'fs';
+import nconf from 'nconf';
+
 
 class MainActivity extends Component {
 
@@ -14,10 +16,11 @@ class MainActivity extends Component {
         let storeOpt = {};
         let path = 'config.json';
         storeOpt.path = 'config.json';
-        this.store = new Store('XtendHue', storeOpt);
+        this.config = nconf;
         this.connectHue = this.connectHue.bind(this);
         this.foundHueBridge = this.foundHueBridge.bind(this);
         this.showVersionInfo = this.showVersionInfo.bind(this);
+        this.config.argv().env().file({ file: 'config/default.json' });
     }
 
     componentDidMount() {
@@ -25,8 +28,8 @@ class MainActivity extends Component {
             isLoading: true,
         });
 
-        let host = this.store.get('hub-host');
-        let user = this.store.get('hub-username');
+        let host = this.config.get('hub-host');
+        let user = this.config.get('hub-user');
         console.log('Host: ' + host);
         console.log('User: ' + user);
         if(host && user){
@@ -78,7 +81,7 @@ class MainActivity extends Component {
         }else if(this.state.selectBridge){
             return (
                 <div>
-                    <FindHueBridges foundHueBridge={ this.foundHueBridge } store={ this.store } />
+                    <FindHueBridges foundHueBridge={ this.foundHueBridge } config={ this.config } />
                 </div>
             );
         }else{
