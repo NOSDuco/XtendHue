@@ -1,3 +1,4 @@
 # XtendHue
+[![Build Status](https://travis-ci.org/nosduco/XtendHue.png)](https://travis-ci.org/nosduco/XtendHue)
 
-lol will get to this eventually
+Currently WIP. Feature list will be added soon.
