@@ -4,13 +4,14 @@ import { Grid, Button } from 'react-bootstrap';
 
 class FindHueBridges extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             isSearching: true,
         };
         this.searchCallback = this.searchCallback.bind(this);
         this.connect = this.connect.bind(this);
+        this.saveUser = this.saveUser.bind(this);
         this.writeCacheAndEnd = this.writeCacheAndEnd.bind(this);
     }
 
@@ -30,37 +31,41 @@ class FindHueBridges extends Component {
         });
     }
 
+    saveUser(result){
+        //User registered successfully
+        this.setState({
+            isSearching: true,
+            user: result,
+        });
+        this.writeCacheAndEnd();
+        console.log('HueApi: New user created ' + this.state.user);
+    }
+
     connect(evt){
         let host = evt.target.innerText;
         this.setState({
             isConnecting: true,
-        });
+            host: host,
+        }, function() { 
         let hueapi = new HueApi();
         console.log(host);
-        hueapi.createUser(host, 
-            function(err, user){
-                if (err) throw err;
-                if (user) {
-                    //User registered successfully
-                    this.setState({
-                        isSearching: true,
-                        user: user,
-                        host: host,
-                    });
-                    this.writeCacheAndEnd();
-                }
-            }
-        );
+        console.log(this.state.host);
+        let userDescription = 'XtendHue';
+        hueapi.registerUser(host, userDescription)
+            .then(this.saveUser)
+            .fail(function (err) {
+                console.log('Error:' + err);
+            }).done();
+        });
     }
 
     writeCacheAndEnd(){
-        let hueinfo = { host: this.state.host, username: this.state.user };
-        this.props.cache.set("hue-hub-ip-address", hueinfo, function(err, success) {
-            if (err) throw err;
-            if(success){
-            }
-        });
-        this.props.foundBridge();
+        console.log('Writing cache and ending');
+        console.log('Host: ' + this.state.host);
+        console.log('User: ' + this.state.user);
+        this.props.store.set('hub-host', this.state.host);
+        this.props.store.set('hub-username', this.state.user);
+        //this.props.foundHueBridge();
     }
 
     render() {

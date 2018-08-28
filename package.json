@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "bootstrap": "3",
+    "data-store": "^3.0.3",
     "node-cache": "^4.2.0",
     "node-hue-api": "^2.4.3",
     "react": "^16.4.2",

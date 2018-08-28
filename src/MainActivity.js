@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import FindHueBridges from './FindHueBridges';
 import { HueApi } from 'node-hue-api';
-const NodeCache = require('node-cache');
+import Store from 'data-store';
 
 class MainActivity extends Component {
 
@@ -11,50 +11,61 @@ class MainActivity extends Component {
             isLoading: true,
             hueConnected: false
         };
-        this.cache = new NodeCache( { stdTLL: 0, checkperoid: 0, deleteOnExpire: false });
-        this.loadCache = this.loadCache.bind(this);
+        let storeOpt = {};
+        let path = 'config.json';
+        storeOpt.path = 'config.json';
+        this.store = new Store('XtendHue', storeOpt);
         this.connectHue = this.connectHue.bind(this);
         this.foundHueBridge = this.foundHueBridge.bind(this);
+        this.showVersionInfo = this.showVersionInfo.bind(this);
     }
 
     componentDidMount() {
         this.setState({
             isLoading: true,
         });
-        //Get IP from cache
-        this.cache.get("hue-hub-info", this.loadCache);
-    }
 
-    loadCache(err, value){
-        if(value != undefined){
+        let host = this.store.get('hub-host');
+        let user = this.store.get('hub-username');
+        console.log('Host: ' + host);
+        console.log('User: ' + user);
+        if(host && user){
             //if IP and username found
             this.setState({
-                ip: value.host,
-                username: value.username,
+                ip: host,
+                username: user,
             });
             this.connectHue();
+        }else{
+            this.setState({
+                isLoading: false,
+                selectBridge: true,
+            });
         }
-        this.setState({
-            isLoading: false,
-            selectBridge: true,
-        });
     }
 
     connectHue(){
+        console.log('Attempting to get hue version');
+        console.log('IP: ' + this.state.ip + ' Username: ' + this.state.username);
         this.hueAPI = new HueApi(this.state.ip, this.state.username);
-        this.hueAPI.getVersion().then(function(result) {
-            this.setState({
-                isLoading: false,
-                message: JSON.stringify(result, null, 2),
-            });
-        }).done();
+        this.hueAPI.getVersion().then(this.showVersionInfo).done();
+    }
+
+    showVersionInfo(result){
+        console.log('Showing version info...setting state...');
+        this.setState({
+            isLoading: false,
+            selectBridge: false,
+            message: JSON.stringify(result, null, 2),
+        });
     }
 
     foundHueBridge(){
-        this.componentDidMount();
+        console.log('Found hue bridge in MainActivity');
         this.setState({
             selectBridge: false,
         });
+        this.componentDidMount();
     }
 
     render() {
@@ -67,7 +78,7 @@ class MainActivity extends Component {
         }else if(this.state.selectBridge){
             return (
                 <div>
-                    <FindHueBridges foundHueBridge={ this.foundHue } cache={ this.cache } />
+                    <FindHueBridges foundHueBridge={ this.foundHueBridge } store={ this.store } />
                 </div>
             );
         }else{
