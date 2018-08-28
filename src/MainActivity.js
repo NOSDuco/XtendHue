@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import FindHueBridges from './FindHueBridges';
 import { HueApi } from 'node-hue-api';
-import fs from 'fs';
 import nconf from 'nconf';
 
 
@@ -13,9 +12,6 @@ class MainActivity extends Component {
             isLoading: true,
             hueConnected: false
         };
-        let storeOpt = {};
-        let path = 'config.json';
-        storeOpt.path = 'config.json';
         this.config = nconf;
         this.connectHue = this.connectHue.bind(this);
         this.foundHueBridge = this.foundHueBridge.bind(this);

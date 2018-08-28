@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PhillipsHueApi, { HueApi } from 'node-hue-api';
 import { Grid, Button } from 'react-bootstrap';
+import fs from 'fs';
 
 class FindHueBridges extends Component {
 
@@ -65,6 +66,10 @@ class FindHueBridges extends Component {
         console.log('User: ' + this.state.user);
         this.props.config.set('hub-host', this.state.host);
         this.props.config.set('hub-username', this.state.user);
+        this.props.config.save(function (err) {
+            fs.readFile('config/default.json', function (err, data) {
+            });
+        });
         this.props.foundHueBridge();
     }
 
